@@ -1,0 +1,116 @@
+::-moz-selection {
+    background-color: #f44336;
+    color: #ffffff;
+}
+
+::selection {
+    background-color: #f44336;
+    color: #ffffff;
+}
+
+.map-container {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: 60px;
+}
+
+.search-box-holder {
+    position: absolute;
+    z-index: 0;
+}
+
+.paper-box {
+    padding: 20px;
+    width: 400px;
+    height: 160px;
+    background-color: #ffffff;
+}
+
+.message {
+    cursor: pointer;
+    position: absolute;
+    text-align: center;
+    top: 90px;
+    margin-left: -720px;
+    z-index: 10;
+}
+
+.new-employee-container {
+    display: none;
+    position: fixed;
+    top: 200px;
+    left: 0;
+    right: 0;
+    z-index: 10000;
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #fff;
+    opacity: 0;
+    display: none;
+    /*pointer-events: none;*/
+    z-index: 9999;
+}
+
+.vis-item.vis-background.work {
+    background-color: darkseagreen;
+}
+
+.vis-item.vis-background.break {
+    background-color: lightcoral;
+}
+
+.vis-item.vis-background.work {
+    background-image: url('../img/noname.png'), url('../img/noname.png');
+    background-position: top left, top right;
+    background-repeat: no-repeat;
+    background-size: auto 100%;
+}
+
+.vis-item.vis-background.work.active {
+    background-image: url('../img/noname.png');
+    background-position: top left;
+    background-repeat: no-repeat;
+    background-size: auto 100%;
+}
+
+.dinner-container {
+    display: none;
+    position: fixed;
+    top: 200px;
+    left: 0;
+    right: 0;
+    z-index: 10000;
+}
+
+.camera-view {
+    width: 320px;
+    height: 240px;
+    border: 1px solid #000000;
+}
+
+.report-header{
+    text-align: center;
+}
+
+.vis-inner {
+    width: 100%;
+}
+
+.name-label{
+    min-width: 120px;
+}
+
+.lateLabel{
+    font-size: 10px;
+    position: absolute;
+    top: 22px;
+    color: #f55549;
+}

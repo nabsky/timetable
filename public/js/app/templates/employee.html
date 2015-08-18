@@ -1,0 +1,66 @@
+<div id="toolbar">
+    <button id="newEmployeeButton" class="btn btn-material-green">Новый сотрудник</button>
+    <button id="deleteSelectedButton" class="btn btn-material-red">Удалить отмеченных</button>
+</div>
+
+<div class="table-container">
+    <table class='employee-table'></table>
+</div>
+
+<div class="overlay"></div>
+
+<div class="new-employee-container container-fluid">
+    <div class="row">
+        <div class="col-lg-4 col-lg-offset-4">
+            <div class="well bs-component">
+                <form class="form-horizontal">
+                    <fieldset>
+                        <legend>Новый сотрудник</legend>
+                        <div class="form-group">
+                            <label for="nameInput" class="col-lg-4 control-label">Фамилия</label>
+
+                            <div class="col-lg-8">
+                                <input type="text" class="form-control" id="nameInput" placeholder="Иванов И.И.">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="timeInput" class="col-lg-4 control-label">Начало смены</label>
+
+                            <div class="col-lg-8">
+                                <input type="text" class="form-control" id="timeInput" placeholder="08:00">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phoneInput" class="col-lg-4 control-label">Телефон</label>
+
+                            <div class="col-lg-8">
+                                <input type="tel" class="form-control" id="phoneInput" placeholder="+79211234556">
+
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" id="dinnerCheckbox"> Уведомлять о начале обеда
+                                    </label>
+                                </div>
+
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" id="finishCheckbox"> Уведомлять о конце смены
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-lg-10 col-lg-offset-4">
+                                <div id="createButton" class="btn btn-primary">Создать</div>
+                                <div id="cancelButton" class="btn btn-default">Отмена</div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

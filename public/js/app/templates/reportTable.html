@@ -1,0 +1,26 @@
+<div class="row">
+    <div class="col-lg-6 col-lg-offset-3">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Сотрудник</th>
+                <th>Отработанное время</th>
+                <th>Обеденное время</th>
+                <th>Опоздания</th>
+            </tr>
+            </thead>
+            <tbody>
+
+            <% _.each(data, function(data) { %>
+            <tr>
+                <td style="text-align: left;"><%= data.name %></td>
+                <td><%= data.work %></td>
+                <td><%= data.dinner %></td>
+                <td><%= data.late %></td>
+            </tr>
+            <% }); %>
+
+            </tbody>
+        </table>
+    </div>
+</div>
