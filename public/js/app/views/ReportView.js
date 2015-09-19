@@ -1,7 +1,16 @@
-define( [ 'App', 'marionette', 'underscore', 'text!templates/report.html', 'material', 'ripples',
-    'bootstrapTable', 'velocity', "moment", 'collections/TimeCollection', 'collections/EmployeeCollection', 'text!templates/reportTable.html'],
-    function( App, Marionette, _, template, material, ripples,
-              bootstrapTable, velocity, moment, TimeCollection, EmployeeCollection, ReportTable) {
+define([
+    'App',
+    'marionette',
+    'underscore',
+    'text!templates/report.html',
+    'material',
+    'ripples',
+    'bootstrapTable',
+    'velocity', 'moment',
+    'collections/TimeCollection',
+    'collections/EmployeeCollection',
+    'text!templates/reportTable.html',
+], function(App, Marionette, _, template, material, ripples, bootstrapTable, velocity, moment, TimeCollection, EmployeeCollection, ReportTable) {
 
         return Marionette.ItemView.extend( {
 
@@ -31,72 +40,117 @@ define( [ 'App', 'marionette', 'underscore', 'text!templates/report.html', 'mate
 
             onAttach: function () {
                 $.material.init();
-                this.ui.inputFrom.val(moment().format("YYYY-MM-DD"));
-                this.ui.inputTo.val(moment().format("YYYY-MM-DD"));
+                this.ui.inputFrom.val(moment().subtract(1, 'day').startOf('month').format("YYYY-MM-DD"));
+                this.ui.inputTo.val(moment().subtract(1, 'day').format("YYYY-MM-DD"));
+                this.ui.inputFrom.datetimepicker({format : "YYYY-MM-DD"});
+                this.ui.inputTo.datetimepicker({format : "YYYY-MM-DD"});
             },
 
             reportButtonClick: function(){
+
                 var that = this;
                 var timeFrom = moment(this.ui.inputFrom.val()).startOf('day');
                 var timeTo = moment(this.ui.inputTo.val()).endOf('day');
 
-                this.timeCollection = new TimeCollection({
+                if(timeTo > moment().startOf('day')){
+                    timeTo = moment().subtract(1, 'day').endOf('day');
+                    this.ui.inputTo.val(timeTo.format("YYYY-MM-DD"));
+                }
+
+                this.timeCollection = new TimeCollection([],{
                         from: timeFrom.unix(),
                         to: timeTo.unix()
                     }
                 );
 
-                //TODO вынести в отдельный хелпер
-                function pad(num, size) {
-                    return ('000000000' + num).substr(-size);
-                }
-
                 this.timeCollection.fetch({
                     success: function(collection){
-                        $.each(that.employeeCollection.models,  function(index, employee){
+
+                        //для каждого сотрудника создаём структуру данных для отчёта
+                        $.each(that.employeeCollection.models, function(index, employee){
                             that.info[employee.get("_id")] = {
-                                work: 0,
-                                dinner: 0,
-                                late: 0
+                                lateDays: [], //дни
+                                workingDays: [], //строки с днями
+                                startTimes: [],//секунды с начала дня
+                                workingLengths: [],//секунды
+                                dinnerLengths: []//секунды
                             };
                         });
 
-                        $.each(collection.models,  function(index, time){
-                            if(time.get("mode") == 'work' && time.has("start")){
-                                var end = moment().unix();
-                                if(time.has("end")){
-                                   end = time.get("end");
-                                }
-                                var period = end - time.get("start");
-                                that.info[time.get("employeeId")].work += period;
-                                if(time.has("late")) {
-                                    that.info[time.get("employeeId")].late++;
-                                }
-                            } else if (time.get("mode") == 'break' && time.has("start")){
-                                var end = moment().unix();
-                                if(time.has("end")){
-                                    end = time.get("end");
-                                }
-                                var period = end - time.get("start");
-                                that.info[time.get("employeeId")].dinner += period;
+                        var info = collection.models.map(function(data, index){
+                            var info = {};
+                            info["day"] = moment.unix(data.get("start")).startOf("day").format("DD.MM.YYYY");
+                            info["employeeId"] = data.get("employeeId");
+                            info["mode"] = data.get("mode");
+                            info["late"] = data.get("late");
+                            info["length"] = data.get("end") - data.get("start");
+                            info["startFromBeginning"] = data.get("start") - moment.unix(data.get("start")).startOf("day").unix();
+                            info["key"] = info["employeeId"] + "-" + info["day"] + "-" + info["mode"];
+                            return info;
+                        });
+
+                        var groupedInfo = _.groupBy(info, "key");
+                        var arr = _.values(groupedInfo).map(function(data, index){
+                            var result = data[0];
+                            if(data.length > 1){
+                               $.each(data, function(index, elem){
+                                   if(elem["startFromBeginning"] < result["startFromBeginning"]){
+                                       result["startFromBeginning"] = elem["startFromBeginning"];
+                                   }
+                                   result["length"] += elem["length"];
+                               });
+                            }
+                            return result
+                        });
+
+                        $.each(arr, function(index, elem){
+                            if(!that.info[elem.employeeId])return;
+                            if(elem.mode == "work"){
+                                that.info[elem.employeeId].workingDays.push(elem.day);
+                                that.info[elem.employeeId].startTimes.push(elem.startFromBeginning);
+                                that.info[elem.employeeId].workingLengths.push(elem.length);
+                            } else {
+                                that.info[elem.employeeId].dinnerLengths.push(elem.length);
+                            }
+                            if(elem.late){
+                                that.info[elem.employeeId].lateDays.push(elem.day);
                             }
                         });
 
                         var data = [];
 
-                        $.each(that.info, function(employeeId, info){
-                            var name = that.employeeCollection.get(employeeId).get("name");
-                            var timeWork = pad(Math.floor(info.work / 60 / 60), 2) + ":" + pad(Math.floor(info.work / 60 % 60), 2);
-                            var timeBreak = pad(Math.floor(info.dinner / 60 / 60), 2) + ":" + pad(Math.floor(info.dinner / 60 % 60), 2);
+
+                        function sum(arr){
+                            return _.reduce(arr, function(sum, el) {
+                                return sum + el
+                            }, 0);
+                        }
+
+                        function average(arr){
+                            return _.reduce(arr, function(memo, num) {
+                                    return memo + num;
+                                }, 0) / (arr.length === 0 ? 1 : arr.length);
+                        }
+
+                        function sec2time(sec){
+                            return moment().startOf("day").add(sec,"seconds").format("HH:mm");
+                        }
+
+                        for (property in that.info) {
                             data.push({
-                                name:name,
-                                work: timeWork,
-                                dinner: timeBreak,
-                                late: info.late
+                                name: property,
+                                work: (sum(that.info[property]["workingLengths"])/3600).toFixed(2),
+                                dinner: (sum(that.info[property]["dinnerLengths"])/3600).toFixed(2),
+                                late: that.info[property]["lateDays"].length,
+                                workDays: that.info[property]["workingDays"].length,
+                                middleStartTime: sec2time(average(that.info[property]["startTimes"])),
+                                middleHoursPerDay: (average(that.info[property]["workingLengths"])/3600).toFixed(2)
                             });
-                        });
+
+                        }
 
                         that.ui.reportTableContainer.html(_.template(ReportTable)({data: data}));
+
                     }
                 })
 
