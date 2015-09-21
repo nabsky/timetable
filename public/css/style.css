@@ -65,6 +65,14 @@
     background-position: left bottom;
 }
 
+.well.bs-component.late {
+    background-image: url("../img/late_bg.png");
+    background-repeat: no-repeat;
+    background-position: left bottom;
+    background-size: auto 100%;
+}
+
+
 .vis-item.vis-background.work {
     background-color: darkseagreen;
 }
